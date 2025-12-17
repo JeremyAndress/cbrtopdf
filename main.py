@@ -4,6 +4,7 @@ import subprocess
 import sys
 import logging
 import shutil
+import pikepdf
 from pathlib import Path
 
 
@@ -38,6 +39,7 @@ def extract_cbr(cbr_path: Path, output_dir: Path):
 
 def collect_images(root_dir: Path):
     images = []
+    chapters = []
     current_dir = root_dir
 
     # 🔽 Auto-descenso de carpetas wrapper
@@ -55,7 +57,7 @@ def collect_images(root_dir: Path):
         else:
             break
 
-    # 🔍 Caso 1: imágenes directas
+    # 🔍 Caso 1: imágenes directas → SIN capítulos
     direct_images = sorted(
         [f for f in current_dir.iterdir() if f.is_file() and f.suffix.lower() in IMAGE_EXTENSIONS],
         key=lambda p: p.name
@@ -63,27 +65,53 @@ def collect_images(root_dir: Path):
 
     if direct_images:
         logger.info(f"Procesando imágenes en: {current_dir}")
-        return direct_images
+        return direct_images, []
 
-    # 🔍 Caso 2: carpetas por tomo
+    # 🔍 Caso 2: carpetas = capítulos
     folders = sorted(
         [d for d in current_dir.iterdir() if d.is_dir()],
         key=lambda p: p.name
     )
 
+    page_index = 0
+
     for folder in folders:
-        logger.info(f"Procesando carpeta: {folder.name}")
-        files = sorted(
+        logger.info(f"Procesando capítulo: {folder.name}")
+        chapter_images = sorted(
             [f for f in folder.iterdir() if f.is_file() and f.suffix.lower() in IMAGE_EXTENSIONS],
             key=lambda p: p.name
         )
-        images.extend(files)
+
+        if not chapter_images:
+            continue
+
+        chapters.append((folder.name, page_index))
+        images.extend(chapter_images)
+        page_index += len(chapter_images)
 
     if not images:
         raise RuntimeError("No se encontraron imágenes")
 
     logger.info(f"Total de imágenes detectadas: {len(images)}")
-    return images
+    logger.info(f"Capítulos detectados: {len(chapters)}")
+    return images, chapters
+
+def add_pdf_bookmarks(pdf_path: Path, chapters):
+    if not chapters:
+        logger.info("No se detectaron capítulos, se omiten bookmarks")
+        return
+
+    logger.info("Agregando bookmarks al PDF")
+
+    pdf = pikepdf.open(pdf_path, allow_overwriting_input=True)
+
+    with pdf.open_outline() as outline:
+        for title, page in chapters:
+            outline.root.append(
+                pikepdf.OutlineItem(f"Capítulo {title}", page)
+            )
+
+    pdf.save(pdf_path)
 
 
 def build_pdf(images, output_pdf: Path):
@@ -116,8 +144,9 @@ def main():
 
     try:
         extract_cbr(cbr_path, output_dir)
-        images = collect_images(output_dir)
+        images, chapters = collect_images(output_dir)
         build_pdf(images, output_pdf)
+        add_pdf_bookmarks(output_pdf, chapters)
 
         if not keep_extracted:
             cleanup(output_dir)
