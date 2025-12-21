@@ -1,0 +1,28 @@
+[project]
+name = "cbrtopdf"
+version = "0.1.0"
+description = "A command-line tool to convert CBR (Comic Book RAR) files into PDF"
+authors = [
+    {name = "JeremyAndress",email = "jeremysilvasilva@gmail.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "typer (==0.20.1)",
+    "pikepdf (==10.0.3)",
+    "pillow (==12.0.0)"
+]
+
+[dependency-groups]
+dev = [
+    "ruff (>=0.14.10,<0.15.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project.scripts]
+cbrtopdf = "cbrtopdf.main:main"
