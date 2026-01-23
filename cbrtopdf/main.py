@@ -59,7 +59,7 @@ def collect_images(
             if split_horizontal:
                 images.extend(split_if_horizontal(img, temp_dir, reading_direction))
             elif rotate_if_horizontal:
-                images.append(rotate_if_horizontal(img, temp_dir))
+                images.append(rotate_image(img, temp_dir))
             else:
                 images.append(img)
 
@@ -94,7 +94,7 @@ def collect_images(
                 images.extend(split_pages)
                 page_index += len(split_pages)
             elif rotate_if_horizontal:
-                images.append(rotate_if_horizontal(img, temp_dir))
+                images.append(rotate_image(img, temp_dir))
                 page_index += 1
             else:
                 images.append(img)
@@ -141,7 +141,7 @@ def split_if_horizontal(
         )
 
 
-def rotate_if_horizontal(img_path: Path, temp_dir: Path):
+def rotate_image(img_path: Path, temp_dir: Path):
     with Image.open(img_path) as img:
         width, height = img.size
 
