@@ -49,7 +49,7 @@ def collect_images(
             for f in current_dir.iterdir()
             if f.is_file() and f.suffix.lower() in IMAGE_EXTENSIONS
         ],
-        key=lambda p: p.name,
+        key=lambda p: p.name.lower(),
     )
 
     if direct_images:
@@ -66,7 +66,7 @@ def collect_images(
         return images, []
 
     folders = sorted(
-        [d for d in current_dir.iterdir() if d.is_dir()], key=lambda p: p.name
+        [d for d in current_dir.iterdir() if d.is_dir()], key=lambda p: p.name.lower()
     )
 
     page_index = 0
@@ -80,7 +80,7 @@ def collect_images(
                 for f in folder.iterdir()
                 if f.is_file() and f.suffix.lower() in IMAGE_EXTENSIONS
             ],
-            key=lambda p: p.name,
+            key=lambda p: p.name.lower(),
         )
 
         if not chapter_images:
