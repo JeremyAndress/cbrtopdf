@@ -128,8 +128,9 @@ def split_if_horizontal(
 
         temp_dir.mkdir(parents=True, exist_ok=True)
 
-        left_path = temp_dir / f"{img_path.stem}_left.{img.format}"
-        right_path = temp_dir / f"{img_path.stem}_right.{img.format}"
+        prefix = f"{img_path.parent.name}_{img_path.stem}"
+        left_path = temp_dir / f"{prefix}_left.{img.format}"
+        right_path = temp_dir / f"{prefix}_right.{img.format}"
 
         left.save(left_path, f"{img.format.upper()}", quality=98)
         right.save(right_path, f"{img.format.upper()}", quality=98)
@@ -152,7 +153,8 @@ def rotate_image(img_path: Path, temp_dir: Path):
 
         temp_dir.mkdir(parents=True, exist_ok=True)
 
-        rotated_path = temp_dir / f"{img_path.stem}_rotated.{img.format}"
+        prefix = f"{img_path.parent.name}_{img_path.stem}"
+        rotated_path = temp_dir / f"{prefix}_rotated.{img.format}"
         rotated.save(rotated_path, f"{img.format.upper()}", quality=98)
 
         return rotated_path
